@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Post } from "@/types/post";
 import { PostCard } from "@/components/post-card";
 import { PostGenerator } from "@/components/post-generator";
+import { StyleAnalyzer } from "@/components/style-analyzer";
 
 // Mock data for demonstration
 const mockPosts: Post[] = [
@@ -46,7 +47,10 @@ const Index = () => {
               Generate, schedule and manage your Facebook posts
             </p>
           </div>
-          <PostGenerator />
+          <div className="flex gap-2">
+            <StyleAnalyzer />
+            <PostGenerator />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
