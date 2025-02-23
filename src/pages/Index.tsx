@@ -8,6 +8,7 @@ import { Shell } from "@/components/shell";
 const mockPosts: Post[] = [
   {
     id: "1",
+    hook: "Découvrez comment j'ai surmonté...",
     content: "Sample storytelling post about entrepreneurship...",
     type: "storytelling",
     status: "draft",
@@ -16,6 +17,7 @@ const mockPosts: Post[] = [
   },
   {
     id: "2",
+    hook: "La clé du succès réside dans...",
     content: "Sample reflection post about success...",
     type: "reflection",
     status: "scheduled",
