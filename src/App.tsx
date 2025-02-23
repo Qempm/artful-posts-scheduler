@@ -9,6 +9,8 @@ import Generate from "./pages/generate";
 import Posts from "./pages/posts";
 import Analytics from "./pages/analytics";
 import Settings from "./pages/settings";
+import Scheduling from "./pages/scheduling";
+import Emails from "./pages/emails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/generate" element={<Generate />} />
           <Route path="/posts" element={<Posts />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/scheduling" element={<Scheduling />} />
+          <Route path="/emails" element={<Emails />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

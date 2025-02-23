@@ -1,7 +1,15 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BarChart3, Home, Settings, FilePen, FolderOpen } from "lucide-react";
+import { 
+  BarChart3, 
+  Home, 
+  Settings, 
+  FilePen, 
+  FolderOpen,
+  Calendar,
+  Mail
+} from "lucide-react";
 
 const menuItems = [
   {
@@ -27,6 +35,18 @@ const menuItems = [
     icon: BarChart3,
     href: "/analytics",
     description: "Statistiques et performances",
+  },
+  {
+    title: "Programmation",
+    icon: Calendar,
+    href: "/scheduling",
+    description: "Planification automatique des posts",
+  },
+  {
+    title: "Emails",
+    icon: Mail,
+    href: "/emails",
+    description: "Gestion des notifications et validations",
   },
   {
     title: "Paramètres",
