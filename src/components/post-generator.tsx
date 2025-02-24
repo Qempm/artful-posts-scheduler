@@ -21,6 +21,8 @@ import { PostType } from "@/types/post";
 import { Sparkles } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type GenerationMode = "manual" | "automatic";
 
@@ -36,14 +38,31 @@ export function PostGenerator() {
     
     setIsGenerating(true);
     try {
-      // TODO: Implement actual AI generation
-      console.log("Generating post with:", { type, subject, mode });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockContent = `🎯 ${type.toUpperCase()}\n\n${subject}\n\nVoici un exemple de contenu généré...`;
-      setGeneratedContent(mockContent);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("Vous devez être connecté pour générer un post");
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('generate-post', {
+        body: {
+          subject,
+          type,
+          userId: user.id
+        },
+      });
+
+      if (error) throw error;
+
+      const post = data.post;
+      setGeneratedContent(`${post.hook}\n\n${post.body}`);
+      toast.success("Post généré avec succès !");
+    } catch (error) {
+      console.error('Error generating post:', error);
+      toast.error("Erreur lors de la génération du post");
     } finally {
       setIsGenerating(false);
     }
