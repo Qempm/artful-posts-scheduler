@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Post } from "@/types/post";
 import { PostCard } from "@/components/post-card";
 import { Shell } from "@/components/shell";
+import { EditPostDialog } from "@/components/edit-post-dialog";
 
 // Mock data for demonstration
 const mockPosts: Post[] = [
@@ -28,14 +29,21 @@ const mockPosts: Post[] = [
 ];
 
 const Index = () => {
-  const [posts] = useState<Post[]>(mockPosts);
+  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleEdit = (post: Post) => {
-    console.log("Editing post:", post);
+    setSelectedPost(post);
+    setEditDialogOpen(true);
   };
 
   const handleEmailPreview = (post: Post) => {
     console.log("Sending email preview for:", post);
+  };
+
+  const handleSavePost = (updatedPost: Post) => {
+    setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
   };
 
   return (
@@ -58,6 +66,15 @@ const Index = () => {
             />
           ))}
         </div>
+
+        {selectedPost && (
+          <EditPostDialog
+            post={selectedPost}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            onSave={handleSavePost}
+          />
+        )}
       </div>
     </Shell>
   );
