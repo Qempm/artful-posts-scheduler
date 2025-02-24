@@ -59,6 +59,50 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          clicked_at: string | null
+          created_at: string | null
+          id: string
+          opened_at: string | null
+          post_id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["email_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          clicked_at?: string | null
+          created_at?: string | null
+          id?: string
+          opened_at?: string | null
+          post_id: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["email_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          clicked_at?: string | null
+          created_at?: string | null
+          id?: string
+          opened_at?: string | null
+          post_id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["email_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faq: {
         Row: {
           id: number
@@ -77,6 +121,60 @@ export type Database = {
           ordre?: number
           question?: string
           reponse?: string
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          body: string
+          comments: number | null
+          created_at: string | null
+          engagement_score: number | null
+          generated_at: string | null
+          hook: string
+          id: string
+          likes: number | null
+          published_at: string | null
+          scheduled_at: string | null
+          shares: number | null
+          status: Database["public"]["Enums"]["post_status"] | null
+          type: Database["public"]["Enums"]["post_type"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          comments?: number | null
+          created_at?: string | null
+          engagement_score?: number | null
+          generated_at?: string | null
+          hook: string
+          id?: string
+          likes?: number | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          shares?: number | null
+          status?: Database["public"]["Enums"]["post_status"] | null
+          type: Database["public"]["Enums"]["post_type"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          comments?: number | null
+          created_at?: string | null
+          engagement_score?: number | null
+          generated_at?: string | null
+          hook?: string
+          id?: string
+          likes?: number | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          shares?: number | null
+          status?: Database["public"]["Enums"]["post_status"] | null
+          type?: Database["public"]["Enums"]["post_type"]
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -107,17 +205,29 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email_notifications: boolean | null
           id: string
+          name: string | null
+          style_profile: Json | null
+          timezone: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          email_notifications?: boolean | null
           id: string
+          name?: string | null
+          style_profile?: Json | null
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          email_notifications?: boolean | null
           id?: string
+          name?: string | null
+          style_profile?: Json | null
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -157,6 +267,36 @@ export type Database = {
           },
         ]
       }
+      settings: {
+        Row: {
+          auto_send_email: boolean | null
+          created_at: string | null
+          id: string
+          reflection_schedule: string | null
+          storytelling_schedule: string | null
+          thread_schedule: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_send_email?: boolean | null
+          created_at?: string | null
+          id: string
+          reflection_schedule?: string | null
+          storytelling_schedule?: string | null
+          thread_schedule?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_send_email?: boolean | null
+          created_at?: string | null
+          id?: string
+          reflection_schedule?: string | null
+          storytelling_schedule?: string | null
+          thread_schedule?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -165,7 +305,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      email_status: "pending" | "delivered" | "opened" | "clicked"
+      post_status: "draft" | "scheduled" | "published"
+      post_type: "storytelling" | "reflection" | "thread"
     }
     CompositeTypes: {
       [_ in never]: never
