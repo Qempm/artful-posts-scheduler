@@ -1,7 +1,7 @@
 
 export type PostType = 'storytelling' | 'reflection' | 'thread';
 
-export type PostStatus = 'draft' | 'scheduled' | 'validated';
+export type PostStatus = 'draft' | 'scheduled' | 'published';
 
 export interface Post {
   id: string;
