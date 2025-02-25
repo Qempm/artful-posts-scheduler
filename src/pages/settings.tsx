@@ -55,9 +55,11 @@ export default function Settings() {
 
       if (profileError) throw profileError;
 
+      const styleProfile = profile?.style_profile as StyleProfile || {};
+
       setSettings({
         ...userSettings,
-        style_profile: profile?.style_profile || {},
+        style_profile: styleProfile,
       });
     } catch (error) {
       console.error('Error loading settings:', error);

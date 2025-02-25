@@ -50,7 +50,22 @@ export function EditPostDialog({ post, open, onOpenChange, onSave }: EditPostDia
 
       if (error) throw error;
 
-      onSave(data as Post);
+      // Map the database response to our Post type
+      const updatedPost: Post = {
+        id: data.id,
+        hook: data.hook,
+        content: data.body,
+        type: data.type,
+        status: data.status,
+        scheduledFor: data.scheduled_at ? new Date(data.scheduled_at) : undefined,
+        likes: data.likes,
+        comments: data.comments,
+        engagement: data.engagement_score,
+        createdAt: new Date(data.created_at),
+        updatedAt: new Date(data.updated_at)
+      };
+
+      onSave(updatedPost);
       toast.success("Post mis à jour avec succès");
       onOpenChange(false);
     } catch (error) {
