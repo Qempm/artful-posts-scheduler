@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 type GenerationMode = "manual" | "automatic";
 
@@ -32,6 +33,7 @@ export function PostGenerator() {
   const [mode, setMode] = useState<GenerationMode>("manual");
   const [generatedContent, setGeneratedContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const navigate = useNavigate();
 
   const handleGenerate = async () => {
     if (!subject.trim()) return;
@@ -44,6 +46,7 @@ export function PostGenerator() {
 
       if (!user) {
         toast.error("Vous devez être connecté pour générer un post");
+        navigate("/login");
         return;
       }
 
@@ -80,7 +83,7 @@ export function PostGenerator() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label>📜 Sujet du post</Label>
+            <Label>📝 Sujet du post</Label>
             <Textarea
               placeholder="Entrez votre sujet ici..."
               value={subject}
