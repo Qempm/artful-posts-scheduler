@@ -26,18 +26,32 @@ type Settings = {
   style_profile?: StyleProfile;
 };
 
+// Helper function to validate StyleProfile shape
+const isStyleProfile = (profile: any): profile is StyleProfile => {
+  return (
+    profile &&
+    typeof profile === 'object' &&
+    (!profile.tone || Array.isArray(profile.tone)) &&
+    (!profile.structure || Array.isArray(profile.structure)) &&
+    (!profile.expressions || Array.isArray(profile.expressions)) &&
+    (!profile.emojiUsage || ['none', 'minimal', 'moderate', 'heavy'].includes(profile.emojiUsage))
+  );
+};
+
+const defaultStyleProfile: StyleProfile = {
+  tone: [],
+  structure: [],
+  expressions: [],
+  emojiUsage: "moderate"
+};
+
 export default function Settings() {
   const [settings, setSettings] = useState<Settings>({
     storytelling_schedule: "",
     reflection_schedule: "",
     thread_schedule: "",
     auto_send_email: false,
-    style_profile: {
-      tone: [],
-      structure: [],
-      expressions: [],
-      emojiUsage: "moderate"
-    }
+    style_profile: defaultStyleProfile
   });
   const [loading, setLoading] = useState(false);
 
@@ -73,12 +87,7 @@ export default function Settings() {
         .from('profiles')
         .upsert({
           id: user.id,
-          style_profile: {
-            tone: [],
-            structure: [],
-            expressions: [],
-            emojiUsage: "moderate"
-          }
+          style_profile: defaultStyleProfile
         }, {
           onConflict: 'id'
         });
@@ -102,14 +111,13 @@ export default function Settings() {
 
       if (profileError) throw profileError;
 
+      const styleProfile = isStyleProfile(profile?.style_profile) 
+        ? profile.style_profile 
+        : defaultStyleProfile;
+
       setSettings({
         ...userSettings,
-        style_profile: profile?.style_profile || {
-          tone: [],
-          structure: [],
-          expressions: [],
-          emojiUsage: "moderate"
-        }
+        style_profile: styleProfile
       });
 
       toast.success("Paramètres chargés avec succès");
