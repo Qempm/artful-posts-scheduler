@@ -27,7 +27,18 @@ type Settings = {
 };
 
 export default function Settings() {
-  const [settings, setSettings] = useState<Settings>({});
+  const [settings, setSettings] = useState<Settings>({
+    storytelling_schedule: "",
+    reflection_schedule: "",
+    thread_schedule: "",
+    auto_send_email: false,
+    style_profile: {
+      tone: [],
+      structure: [],
+      expressions: [],
+      emojiUsage: "moderate"
+    }
+  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -37,8 +48,44 @@ export default function Settings() {
   const loadSettings = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        toast.error("Vous devez être connecté pour accéder aux paramètres");
+        return;
+      }
 
+      // Initialize settings if they don't exist
+      const { error: initError } = await supabase
+        .from('settings')
+        .upsert({
+          id: user.id,
+          storytelling_schedule: "0 9 * * 1,4", // Default: Monday and Thursday at 9am
+          reflection_schedule: "0 14 * * 2,5", // Default: Tuesday and Friday at 2pm
+          thread_schedule: "0 11 * * 3,6", // Default: Wednesday and Saturday at 11am
+          auto_send_email: false
+        }, {
+          onConflict: 'id'
+        });
+
+      if (initError) throw initError;
+
+      // Initialize profile if it doesn't exist
+      const { error: profileInitError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          style_profile: {
+            tone: [],
+            structure: [],
+            expressions: [],
+            emojiUsage: "moderate"
+          }
+        }, {
+          onConflict: 'id'
+        });
+
+      if (profileInitError) throw profileInitError;
+
+      // Now load the settings
       const { data: userSettings, error: settingsError } = await supabase
         .from('settings')
         .select('*')
@@ -55,12 +102,17 @@ export default function Settings() {
 
       if (profileError) throw profileError;
 
-      const styleProfile = profile?.style_profile as StyleProfile || {};
-
       setSettings({
         ...userSettings,
-        style_profile: styleProfile,
+        style_profile: profile?.style_profile || {
+          tone: [],
+          structure: [],
+          expressions: [],
+          emojiUsage: "moderate"
+        }
       });
+
+      toast.success("Paramètres chargés avec succès");
     } catch (error) {
       console.error('Error loading settings:', error);
       toast.error("Erreur lors du chargement des paramètres");
@@ -79,13 +131,13 @@ export default function Settings() {
       // Update settings
       const { error: settingsError } = await supabase
         .from('settings')
-        .update({
+        .upsert({
+          id: user.id,
           storytelling_schedule: settings.storytelling_schedule,
           reflection_schedule: settings.reflection_schedule,
           thread_schedule: settings.thread_schedule,
           auto_send_email: settings.auto_send_email,
-        })
-        .eq('id', user.id);
+        });
 
       if (settingsError) throw settingsError;
 
