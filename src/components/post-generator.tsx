@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { PostType } from "@/types/post";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Save } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +33,9 @@ export function PostGenerator() {
   const [mode, setMode] = useState<GenerationMode>("manual");
   const [generatedContent, setGeneratedContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editedHook, setEditedHook] = useState("");
+  const [editedBody, setEditedBody] = useState("");
   const navigate = useNavigate();
 
   const handleGenerate = async () => {
@@ -61,6 +64,8 @@ export function PostGenerator() {
       if (error) throw error;
 
       const post = data.post;
+      setEditedHook(post.hook);
+      setEditedBody(post.body);
       setGeneratedContent(`${post.hook}\n\n${post.body}`);
       toast.success("Post généré avec succès !");
     } catch (error) {
@@ -68,6 +73,46 @@ export function PostGenerator() {
       toast.error("Erreur lors de la génération du post");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!editedHook.trim() || !editedBody.trim()) {
+      toast.error("Le contenu du post ne peut pas être vide");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("Vous devez être connecté pour sauvegarder un post");
+        navigate("/login");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('posts')
+        .insert({
+          hook: editedHook,
+          body: editedBody,
+          type,
+          user_id: user.id,
+          status: 'draft'
+        });
+
+      if (error) throw error;
+
+      toast.success("Post sauvegardé avec succès !");
+      navigate("/posts"); // Redirection vers le tableau de bord
+    } catch (error) {
+      console.error('Error saving post:', error);
+      toast.error("Erreur lors de la sauvegarde du post");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -135,27 +180,48 @@ export function PostGenerator() {
         </CardContent>
       </Card>
 
-      {/* Aperçu du post généré */}
+      {/* Aperçu et édition du post généré */}
       <Card className={cn(
         "transition-opacity duration-200",
         !generatedContent && "opacity-50"
       )}>
         <CardHeader>
-          <CardTitle>Aperçu du post</CardTitle>
+          <CardTitle>Édition du post</CardTitle>
           <CardDescription>
-            Prévisualisez votre post avant de le valider
+            Modifiez votre post avant de le valider
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          {generatedContent ? (
-            <div className="whitespace-pre-wrap rounded-lg bg-gray-50 p-4 font-medium">
-              {generatedContent}
-            </div>
-          ) : (
-            <div className="text-center text-muted-foreground p-4">
-              Le contenu généré apparaîtra ici...
-            </div>
-          )}
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>🎯 Accroche</Label>
+            <Textarea
+              value={editedHook}
+              onChange={(e) => setEditedHook(e.target.value)}
+              placeholder="L'accroche de votre post..."
+              className="min-h-[80px]"
+              disabled={!generatedContent}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>📝 Contenu</Label>
+            <Textarea
+              value={editedBody}
+              onChange={(e) => setEditedBody(e.target.value)}
+              placeholder="Le contenu de votre post..."
+              className="min-h-[200px]"
+              disabled={!generatedContent}
+            />
+          </div>
+
+          <Button
+            onClick={handleSave}
+            disabled={!generatedContent || isSaving}
+            className="w-full"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? "Sauvegarde..." : "💾 Valider le post"}
+          </Button>
         </CardContent>
       </Card>
     </div>
