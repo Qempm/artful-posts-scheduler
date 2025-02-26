@@ -15,7 +15,7 @@ const menuItems = [
   {
     title: "Dashboard",
     icon: Home,
-    href: "/",
+    href: "/dashboard",
     description: "Vue d'ensemble de vos posts et statistiques",
   },
   {
