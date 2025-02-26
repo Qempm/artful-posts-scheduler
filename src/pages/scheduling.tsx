@@ -3,33 +3,38 @@ import { useState } from "react";
 import { Shell } from "@/components/shell";
 import { PostType } from "@/types/post";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type WeekDay = "Lundi" | "Mercredi" | "Vendredi";
 
 interface ScheduleSettings {
   type: PostType;
-  day: WeekDay;
+  date: Date | undefined;
   enabled: boolean;
 }
 
 const defaultSettings: ScheduleSettings[] = [
-  { type: "storytelling", day: "Lundi", enabled: true },
-  { type: "reflection", day: "Mercredi", enabled: true },
-  { type: "thread", day: "Vendredi", enabled: true },
+  { type: "storytelling", date: undefined, enabled: true },
+  { type: "reflection", date: undefined, enabled: true },
+  { type: "thread", date: undefined, enabled: true },
 ];
 
 export default function Scheduling() {
   const [settings, setSettings] = useState<ScheduleSettings[]>(defaultSettings);
   
-  const updateSchedule = (type: PostType, day: WeekDay) => {
+  const updateSchedule = (type: PostType, date: Date | undefined) => {
     setSettings(prev => 
       prev.map(setting => 
-        setting.type === type ? { ...setting, day } : setting
+        setting.type === type ? { ...setting, date } : setting
       )
     );
   };
@@ -56,8 +61,6 @@ export default function Scheduling() {
     }
   };
 
-  const days: WeekDay[] = ["Lundi", "Mercredi", "Vendredi"];
-
   return (
     <Shell>
       <div className="space-y-6">
@@ -70,7 +73,7 @@ export default function Scheduling() {
         
         <div className="grid gap-6">
           {settings.map((setting) => (
-            <Card key={setting.type}>
+            <Card key={setting.type} className="animate-in">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -88,19 +91,44 @@ export default function Scheduling() {
                 </div>
               </CardHeader>
               <CardContent>
-                <RadioGroup
-                  value={setting.day}
-                  onValueChange={(value: WeekDay) => updateSchedule(setting.type, value)}
-                  className="flex gap-4"
-                  disabled={!setting.enabled}
-                >
-                  {days.map((day) => (
-                    <div key={day} className="flex items-center space-x-2">
-                      <RadioGroupItem value={day} id={`${setting.type}-${day}`} />
-                      <Label htmlFor={`${setting.type}-${day}`}>{day}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                <div className="flex flex-col space-y-4">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !setting.date && "text-muted-foreground"
+                        )}
+                        disabled={!setting.enabled}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {setting.date ? (
+                          format(setting.date, "PPP", { locale: fr })
+                        ) : (
+                          <span>Choisir une date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={setting.date}
+                        onSelect={(date) => updateSchedule(setting.type, date)}
+                        disabled={!setting.enabled}
+                        initialFocus
+                        locale={fr}
+                        className="rounded-md border bg-popover text-popover-foreground shadow-md"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  {setting.date && (
+                    <p className="text-sm text-muted-foreground">
+                      Prochain post programmé pour le {format(setting.date, "PPPP", { locale: fr })}
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
